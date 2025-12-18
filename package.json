@@ -28,6 +28,7 @@
     "@gympass/i18n-language-web": "^0.2.0",
     "@gympass/keycloak-auth-js": "^2.5.0",
     "@gympass/tai-chi": "^4.32.0",
+    "@hookform/resolvers": "^5.2.2",
     "@mui/lab": "^5.0.0-alpha.167",
     "@mui/material": "^5.15.14",
     "@mui/x-data-grid": "^8.16.0",
@@ -35,15 +36,15 @@
     "@snowplow/browser-tracker": "^4.6.8",
     "@tanstack/react-query": "^5.90.12",
     "axios": "^1.13.2",
-    "formik": "^2.4.9",
     "imask": "^7.6.1",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-google-autocomplete": "^2.7.5",
+    "react-hook-form": "^7.68.0",
     "react-router-dom": "^7.10.1",
     "styled-components": "^6.1.19",
     "uuid": "^13.0.0",
-    "yup": "^1.7.1"
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
@@ -51,6 +52,7 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.1",
     "@testing-library/user-event": "^14.6.1",
+    "@types/google.maps": "^3.58.1",
     "@types/node": "^25.0.0",
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",

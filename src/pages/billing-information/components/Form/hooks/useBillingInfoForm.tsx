@@ -1,8 +1,9 @@
 import { formatCPF } from '@gympass/bpux-billing-utils'
-import { useFormik } from 'formik'
-import IMask, { MaskedPattern } from 'imask'
-import { useEffect, useMemo, useState } from 'react'
+import { zodResolver } from '@hookform/resolvers/zod'
+import IMask, { type MaskedPattern } from 'imask'
+import { useMemo, useState } from 'react'
 import { usePlacesWidget } from 'react-google-autocomplete'
+import { useForm } from 'react-hook-form'
 
 import { useTracking } from '@/core/hooks/useTracking'
 import { useTranslation } from '@/core/hooks/useTranslation'
@@ -14,7 +15,7 @@ import type { IBillingInformation } from '@/modules/account/types'
 import { selectPostalCodeButtonClickTrack } from '../../../tracking'
 import { BILLING_INFORMATION_COUNTRY_SETTINGS } from '../config'
 import { COUNTRIES_NAMES } from '../constants'
-import { billInfoSchema } from '../schema'
+import { type BillInfoFormValues, billInfoSchema } from '../schema'
 import { getAddressValues } from '../utils'
 
 type TUseBillingInfoFormProps = {
@@ -66,8 +67,10 @@ export function useBillingInfoForm({
       ] || currentBillingInfo?.country
     : ''
 
-  const formik = useFormik({
-    initialValues: {
+  const formMethods = useForm<BillInfoFormValues>({
+    resolver: zodResolver(billInfoSchema(t)),
+    mode: 'onChange',
+    defaultValues: {
       taxIdNumber: formattedCPF,
       postalCode: currentBillingInfo?.postalCode || '',
       street: currentBillingInfo?.street || '',
@@ -78,27 +81,37 @@ export function useBillingInfoForm({
       state: currentBillingInfo?.state || '',
       country: countryName,
     },
-    validationSchema: billInfoSchema(t),
-    validateOnMount: true,
-    onSubmit: values => {
-      if (!hasCurrentBillingInfo) {
-        setIsConfirmOpened(true)
-      } else {
-        billingInformationMutation.mutate(
-          {
-            userId: loggedUser?.id || '',
-            correlationId,
-            billingInformation: values,
-          },
-          {
-            onSuccess: () => {
-              formik.resetForm({ values })
-            },
-          }
-        )
-      }
-    },
   })
+
+  const {
+    setValue,
+    getValues,
+    watch,
+    reset,
+    formState: { errors },
+  } = formMethods
+
+  const postalCodeError = errors.postalCode
+  const watchedCity = watch('city')
+
+  const onSubmit = (data: BillInfoFormValues) => {
+    if (!hasCurrentBillingInfo) {
+      setIsConfirmOpened(true)
+    } else {
+      billingInformationMutation.mutate(
+        {
+          userId: loggedUser?.id || '',
+          correlationId,
+          billingInformation: data,
+        },
+        {
+          onSuccess: () => {
+            reset(data)
+          },
+        }
+      )
+    }
+  }
 
   const { ref } = usePlacesWidget({
     apiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -120,10 +133,12 @@ export function useBillingInfoForm({
 
       const addressValues = getAddressValues(place.address_components)
 
-      formik.setValues(prev => ({
-        ...prev,
-        ...addressValues,
-      }))
+      Object.entries(addressValues).forEach(([key, value]) => {
+        setValue(key as keyof BillInfoFormValues, value, {
+          shouldValidate: true,
+          shouldDirty: true,
+        })
+      })
 
       if (!addressValues.city) {
         setIsInvalidAddress(true)
@@ -136,15 +151,16 @@ export function useBillingInfoForm({
   })
 
   const handleConfirm = (): void => {
+    const currentValues = getValues()
     billingInformationMutation.mutate(
       {
         userId: loggedUser?.id || '',
         correlationId,
-        billingInformation: formik.values,
+        billingInformation: currentValues,
       },
       {
         onSuccess: () => {
-          formik.resetForm({ values: formik.values })
+          reset(currentValues)
         },
       }
     )
@@ -160,37 +176,32 @@ export function useBillingInfoForm({
 
       const cachedMask = inputMasks.get(mask)!
       cachedMask.resolve(value)
-      formik.setFieldValue(id, cachedMask.value)
+      setValue(id as keyof BillInfoFormValues, cachedMask.value, {
+        shouldValidate: true,
+        shouldDirty: true,
+      })
     }
 
   const cleanAddressFields = (): void => {
-    formik.setValues(prev => ({
-      ...prev,
-      street: '',
-      doorNumber: '',
-      street2: '',
-      neighborhood: '',
-      city: '',
-      state: '',
-      country: '',
-    }))
+    setValue('street', '', { shouldValidate: true })
+    setValue('doorNumber', '', { shouldValidate: true })
+    setValue('street2', '', { shouldValidate: true })
+    setValue('neighborhood', '', { shouldValidate: true })
+    setValue('city', '', { shouldValidate: true })
+    setValue('state', '', { shouldValidate: true })
+    setValue('country', '', { shouldValidate: true })
 
     setAllowCustomFields(false)
   }
 
   const addressNotFound = useMemo(
-    () =>
-      (!formik.errors.postalCode && !formik.values.city) || isInvalidAddress,
-    [formik.errors.postalCode, formik.values.city, isInvalidAddress]
+    () => (!postalCodeError && !watchedCity) || isInvalidAddress,
+    [postalCodeError, watchedCity, isInvalidAddress]
   )
 
-  useEffect(() => {
-    formik.validateForm(formik.values)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formik.values])
-
   return {
-    formik,
+    methods: formMethods,
+    onSubmit,
     ref,
     isInvalidAddress,
     isConfirmOpened,

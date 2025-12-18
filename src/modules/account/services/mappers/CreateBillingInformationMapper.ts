@@ -1,4 +1,4 @@
-import { IBillingInformation } from '../billing-information.service'
+import type { IBillingInformation } from '../billing-information.service'
 
 const COUNTRIES_REFERENCES = {
   Brasil: 'BR',

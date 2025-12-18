@@ -78,7 +78,7 @@ export const InformationDrawer = ({
 
       <Typography variant="body2" weight="bold" textAlign="center" py={2}>
         {t('billing_information.page.info.help_text', {
-          defaultValue: 'Precisa de ajuda?',
+          defaultValue: 'Need help?',
         })}{' '}
         <Link
           href={helpCenterUrl}
@@ -86,11 +86,11 @@ export const InformationDrawer = ({
           onClick={handleHelpCenterClick}
         >
           {t('billing_information.page.info.help_link', {
-            defaultValue: 'Visite a Central de Ajuda',
+            defaultValue: 'Visit the Help Center',
           })}
           <ScreenReaderOnlyText>
             {t('billing_information.page.info.help_link.a11y.supplementary', {
-              defaultValue: 'para mais informações',
+              defaultValue: 'for more information',
             })}
           </ScreenReaderOnlyText>
         </Link>

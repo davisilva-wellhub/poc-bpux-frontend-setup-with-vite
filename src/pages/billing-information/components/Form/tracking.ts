@@ -1,11 +1,11 @@
-import { IBillingInformation } from '@/modules/account/types'
+import type { IBillingInformation } from '@/modules/account/types'
 
-export enum SNOWPLOW_EVENT_METADATA {
-  FILLED = 'FILLED',
-  MISSING = 'MISSING',
-  REGISTER = 'REGISTER',
-  UPDATE = 'UPDATE',
-}
+export const SNOWPLOW_EVENT_METADATA = {
+  FILLED: 'FILLED',
+  MISSING: 'MISSING',
+  REGISTER: 'REGISTER',
+  UPDATE: 'UPDATE',
+} as const
 
 export const saveInformationButtonClickEventTrack = (
   billingInformation: IBillingInformation | undefined

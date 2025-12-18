@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { useFormContext } from 'react-hook-form'
 
 import { useAriaLiveRegion } from '@/core/hooks/useAriaLiveRegion'
 import { useTracking } from '@/core/hooks/useTracking'
@@ -6,6 +7,7 @@ import { useTranslation } from '@/core/hooks/useTranslation'
 import type { IBillingInformation } from '@/modules/account/types'
 
 import { useBillingInfoForm } from './hooks'
+import type { BillInfoFormValues } from './schema'
 import {
   clearInputEventTrack,
   closeButtonClickEventTrack,
@@ -23,8 +25,14 @@ export const useForm = ({ currentBillingInfo, onError, onSuccess }: TProps) => {
   const { t } = useTranslation()
   const { trackEvent } = useTracking()
 
+  // Access only the RHF methods needed for this hook
   const {
-    formik,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = useFormContext<BillInfoFormValues>()
+
+  const {
     ref,
     isConfirmOpened,
     setIsConfirmOpened,
@@ -42,18 +50,17 @@ export const useForm = ({ currentBillingInfo, onError, onSuccess }: TProps) => {
     onError,
   })
   const { setMessage, ariaLiveRegionElement } = useAriaLiveRegion()
-  const { values, handleChange, dirty, isValid, errors } = formik
 
   const CPFHelperText = errors.taxIdNumber
-    ? errors.taxIdNumber
+    ? errors.taxIdNumber.message
     : t('billing_information.form.cpf.helper_text', {
-        defaultValue: 'Após salvo, o CPF não pode ser modificado.',
+        defaultValue: 'Once saved, CPF cannot be modified.',
       })
 
   const disabledFieldSupplementaryText = t(
     'billing-users-mfe.billing_information.form.input.disabled.a11y.supplementary',
     {
-      defaultValue: 'Campo desabilitado, será preenchido automáticamente',
+      defaultValue: 'Disabled field, will be filled automatically',
     }
   )
 
@@ -69,7 +76,7 @@ export const useForm = ({ currentBillingInfo, onError, onSuccess }: TProps) => {
     ariaLabel: t(
       'billing-users-mfe.billing_information.form.input.clear.a11y.label',
       {
-        defaultValue: 'Apagar {{value}}',
+        defaultValue: 'Clear {{value}}',
         value: value || field,
       }
     ),
@@ -79,13 +86,13 @@ export const useForm = ({ currentBillingInfo, onError, onSuccess }: TProps) => {
         cleanAddressFields()
       }
 
-      formik.setFieldValue(formName, '')
+      setValue(formName, '')
 
-      trackEvent(clearInputEventTrack(formName, values.country))
+      trackEvent(clearInputEventTrack(formName, getValues('country')))
 
       setMessage(
         t('billing_information.form.input.clear.a11y.feedback', {
-          defaultValue: '{{value}} foi excluído. Insira um novo {{field}}',
+          defaultValue: '{{value}} was cleared. Enter a new {{field}}',
           field,
           value: value || field,
         })
@@ -95,11 +102,12 @@ export const useForm = ({ currentBillingInfo, onError, onSuccess }: TProps) => {
 
   useEffect(() => {
     if (userHasSelectedAddress && !addressNotFound && !errors.postalCode) {
+      const values = getValues()
       setMessage(
         t('billing_information.form.cep.selected.a11y.feedback', {
           address: `${values.street}, ${values.neighborhood}, ${values.city}, ${values.state}`,
           defaultValue:
-            '{{address}} foi selecionado, os campos desabilitados foram preenchidos automaticamente',
+            '{{address}} was selected, disabled fields were filled automatically',
         })
       )
     }
@@ -111,13 +119,13 @@ export const useForm = ({ currentBillingInfo, onError, onSuccess }: TProps) => {
   }
 
   const handleConfirmClick = () => {
-    trackEvent(confirmButtonClickEventTrack(values))
+    trackEvent(confirmButtonClickEventTrack(getValues()))
 
     handleConfirm()
   }
 
   const handleCloseClick = () => {
-    trackEvent(closeButtonClickEventTrack(values))
+    trackEvent(closeButtonClickEventTrack(getValues()))
 
     setIsConfirmOpened(false)
   }
@@ -125,13 +133,7 @@ export const useForm = ({ currentBillingInfo, onError, onSuccess }: TProps) => {
   return {
     t,
     ref,
-    dirty,
-    errors,
-    formik,
-    values,
-    isValid,
     trackEvent,
-    handleChange,
     buildAdornment,
     CPFHelperText,
     addressNotFound,

@@ -29,19 +29,19 @@ const BillingInformation = () => {
     <>
       <PageHeader
         title={t('billing_information.page.title', {
-          defaultValue: 'Dados de faturamento',
+          defaultValue: 'Billing information',
         })}
         onInfoClicked={handleInfoClick}
         backButtonA11yLabel={t('billing_information.page.back.a11y.label', {
-          defaultValue: 'Voltar para a tela anterior',
+          defaultValue: 'Back to previous screen',
         })}
         infoButtonA11yLabel={t('billing_information.page.info.a11y.label', {
-          defaultValue: 'Informações',
+          defaultValue: 'Information',
         })}
         infoButtonA11ySupplementary={t(
           'billing_information.page.info.a11y.supplementary',
           {
-            defaultValue: 'Entenda por que precisamos dos seus dados',
+            defaultValue: 'Understand why we need your data',
           }
         )}
         onBackClicked={handleBackClick}

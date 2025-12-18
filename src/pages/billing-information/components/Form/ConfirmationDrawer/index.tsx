@@ -57,7 +57,7 @@ export const ConfirmationDrawer = ({
           <Typography variant="body2">
             <strong>
               {t('billing_information.form.address.label', {
-                defaultValue: 'Endereço',
+                defaultValue: 'Address',
               })}
               :
             </strong>{' '}
@@ -70,7 +70,7 @@ export const ConfirmationDrawer = ({
         <Alert
           icon="Info"
           message={t('billing_information.form.confirmation.warning', {
-            defaultValue: 'O CPF não poderá ser modificado após salvar.',
+            defaultValue: 'CPF cannot be modified after saving.',
           })}
           severity="warning"
           title=""
@@ -87,7 +87,7 @@ export const ConfirmationDrawer = ({
           loading={isLoading}
         >
           {t('billing_information.form.confirmation.confirm', {
-            defaultValue: 'Confirmar',
+            defaultValue: 'Confirm',
           })}
         </Button>
 

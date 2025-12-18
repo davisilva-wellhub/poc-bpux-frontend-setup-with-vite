@@ -1,4 +1,4 @@
-import { IBillingInformation } from '@/modules/account/types'
+import type { IBillingInformation } from '@/modules/account/types'
 
 export const confirmationDrawerPageViewTrack = (
   billingInformation: IBillingInformation,

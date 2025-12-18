@@ -1,10 +1,13 @@
 import { Button, TextField, Typography } from '@gympass/tai-chi'
 import { Box, Grid } from '@mui/material'
+import { FormProvider, useFormContext } from 'react-hook-form'
 
 import { ScreenReaderOnlyText } from '@/core/components/ScreenReaderOnlyText'
 import type { IBillingInformation } from '@/modules/account/types'
 
 import { ConfirmationDrawer } from './ConfirmationDrawer'
+import { useBillingInfoForm } from './hooks'
+import type { BillInfoFormValues } from './schema'
 import { ButtonWrapper } from './styles'
 import { inputFocusEventTrack } from './tracking'
 import { useForm } from './useForm'
@@ -15,21 +18,24 @@ type TFormProps = {
   onError: () => void
 }
 
-export const Form = ({
+const FormContent = ({
   currentBillingInfo,
   onSuccess,
   onError,
 }: TFormProps) => {
   const {
+    register,
+    formState: { errors, isValid, isDirty },
+    watch,
+    handleSubmit,
+  } = useFormContext<BillInfoFormValues>()
+
+  const values = watch()
+
+  const {
     t,
     ref,
-    dirty,
-    errors,
-    formik,
-    values,
-    isValid,
     trackEvent,
-    handleChange,
     buildAdornment,
     CPFHelperText,
     addressNotFound,
@@ -50,13 +56,21 @@ export const Form = ({
     onSuccess,
   })
 
+  const { onSubmit } = useBillingInfoForm({
+    currentBillingInfo,
+    onSuccess,
+    onError,
+  })
+
   return (
     <Box pb="96px">
-      <form onSubmit={formik.handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <Box mb={7}>
-          <Typography component="h2" variant="body2" weight="bold" mb={5}>
-            CPF
-          </Typography>
+          <Box mb={5}>
+            <Typography component="h2" variant="body2" weight="bold">
+              CPF
+            </Typography>
+          </Box>
 
           <Grid container spacing={6}>
             <Grid
@@ -80,7 +94,7 @@ export const Form = ({
                 disabled={hasCurrentBillingInfo}
                 fullWidth
                 ariaLabel={t('billing_information.form.cpf.a11y.label', {
-                  defaultValue: 'Insira seu CPF',
+                  defaultValue: 'Enter your CPF',
                 })}
                 endAdornment={
                   !hasCurrentBillingInfo
@@ -97,11 +111,13 @@ export const Form = ({
         </Box>
 
         <Box>
-          <Typography component="h2" variant="body2" weight="bold" mb={5}>
-            {t('billing_information.form.address.label', {
-              defaultValue: 'Endereço',
-            })}
-          </Typography>
+          <Box mb={5}>
+            <Typography component="h2" variant="body2" weight="bold">
+              {t('billing_information.form.address.label', {
+                defaultValue: 'Address',
+              })}
+            </Typography>
+          </Box>
 
           <Grid container spacing={5}>
             <Grid
@@ -129,13 +145,13 @@ export const Form = ({
                   addressNotFound
                     ? t('billing_information.form.cep.invalid', {
                         defaultValue:
-                          'CEP não encontrado. Tente novamente ou contate a Central de Ajuda.',
+                          'Postal code not found. Try again or contact the Help Center.',
                       })
                     : ''
                 }
                 fullWidth
                 ariaLabel={t('billing_information.form.cep.a11y.label', {
-                  defaultValue: 'Insira seu CEP',
+                  defaultValue: 'Enter your postal code',
                 })}
                 endAdornment={buildAdornment({
                   field: 'CEP',
@@ -153,23 +169,22 @@ export const Form = ({
               }
             >
               <TextField
+                {...register('street')}
                 id="street"
                 label={t('billing_information.form.street.label', {
-                  defaultValue: 'Logradouro',
+                  defaultValue: 'Street',
                 })}
-                name="street"
                 required
                 value={values.street}
-                onChange={handleChange}
                 disabled={!allowCustomFields}
-                error={!!(values.street && errors.street)}
+                error={!!errors.street}
                 fullWidth
                 ariaDescribedBy="street-disabled-supplementary-text"
                 endAdornment={
                   allowCustomFields
                     ? buildAdornment({
                         field: t('billing_information.form.street.label', {
-                          defaultValue: 'Logradouro',
+                          defaultValue: 'Street',
                         }),
                         formName: 'street',
                         value: values.street,
@@ -192,17 +207,16 @@ export const Form = ({
               }
             >
               <TextField
+                {...register('doorNumber')}
                 id="doorNumber"
                 label={t('billing_information.form.number.label', {
-                  defaultValue: 'Número',
+                  defaultValue: 'Number',
                 })}
-                name="doorNumber"
                 value={values.doorNumber}
-                onChange={handleChange}
                 fullWidth
                 endAdornment={buildAdornment({
                   field: t('billing_information.form.number.label', {
-                    defaultValue: 'Número',
+                    defaultValue: 'Number',
                   }),
                   formName: 'doorNumber',
                   value: values.doorNumber,
@@ -218,18 +232,17 @@ export const Form = ({
               }
             >
               <TextField
+                {...register('street2')}
                 id="street2"
                 label={t('billing_information.form.street2.label', {
-                  defaultValue: 'Complemento (Opcional)',
+                  defaultValue: 'Complement (Optional)',
                 })}
-                name="street2"
                 value={values.street2}
-                onChange={handleChange}
-                error={!!(values.street2 && errors.street2)}
+                error={!!errors.street2}
                 fullWidth
                 endAdornment={buildAdornment({
                   field: t('billing_information.form.street2.label', {
-                    defaultValue: 'Complemento (Opcional)',
+                    defaultValue: 'Complement (Optional)',
                   }),
                   formName: 'street2',
                   value: values.street2,
@@ -245,14 +258,13 @@ export const Form = ({
               }
             >
               <TextField
+                {...register('neighborhood')}
                 id="neighborhood"
                 label={t('billing_information.form.neighborhood.label', {
-                  defaultValue: 'Bairro',
+                  defaultValue: 'Neighborhood',
                 })}
-                name="neighborhood"
                 required
                 value={values.neighborhood}
-                onChange={handleChange}
                 disabled={!allowCustomFields}
                 fullWidth
                 ariaDescribedBy="neighborhood-disabled-supplementary-text"
@@ -262,7 +274,7 @@ export const Form = ({
                         field: t(
                           'billing_information.form.neighborhood.label',
                           {
-                            defaultValue: 'Bairro',
+                            defaultValue: 'Neighborhood',
                           }
                         ),
                         formName: 'neighborhood',
@@ -286,11 +298,11 @@ export const Form = ({
               }
             >
               <TextField
+                {...register('city')}
                 id="city"
                 label={t('billing_information.form.city.label', {
-                  defaultValue: 'Cidade',
+                  defaultValue: 'City',
                 })}
-                name="city"
                 value={values.city}
                 disabled
                 fullWidth
@@ -309,11 +321,11 @@ export const Form = ({
               }
             >
               <TextField
+                {...register('state')}
                 id="state"
                 label={t('billing_information.form.state.label', {
-                  defaultValue: 'Estado',
+                  defaultValue: 'State',
                 })}
-                name="state"
                 value={values.state}
                 disabled
                 fullWidth
@@ -332,11 +344,11 @@ export const Form = ({
               }
             >
               <TextField
+                {...register('country')}
                 id="country"
                 label={t('billing_information.form.country.label', {
-                  defaultValue: 'País',
+                  defaultValue: 'Country',
                 })}
-                name="country"
                 value={values.country}
                 disabled
                 fullWidth
@@ -354,18 +366,18 @@ export const Form = ({
             type="submit"
             fullWidth
             size="large"
-            disabled={!dirty || !isValid}
+            disabled={!isDirty || !isValid}
             loading={billingInformationMutation.isPending}
             onClick={handleSaveInformationClick}
           >
             {t('billing_information.form.cta.save', {
-              defaultValue: 'Salvar',
+              defaultValue: 'Save',
             })}
           </Button>
         </ButtonWrapper>
       </form>
 
-      {!hasCurrentBillingInfo && values && (
+      {!hasCurrentBillingInfo && (
         <ConfirmationDrawer
           isOpen={isConfirmOpened}
           billingInformation={values}
@@ -377,5 +389,15 @@ export const Form = ({
 
       {ariaLiveRegionElement}
     </Box>
+  )
+}
+
+export const Form = (props: TFormProps) => {
+  const { methods } = useBillingInfoForm(props)
+
+  return (
+    <FormProvider {...methods}>
+      <FormContent {...props} />
+    </FormProvider>
   )
 }
