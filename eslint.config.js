@@ -6,14 +6,12 @@ import tseslint from 'typescript-eslint'
 import prettier from 'eslint-plugin-prettier/recommended'
 import simpleImportSort from 'eslint-plugin-simple-import-sort'
 
-export default tseslint.config(
+export default [
   { ignores: ['dist', 'node_modules', 'coverage', '.vite'] },
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  prettier,
   {
-    extends: [
-      js.configs.recommended,
-      ...tseslint.configs.recommended,
-      prettier,
-    ],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
@@ -40,5 +38,5 @@ export default tseslint.config(
       'simple-import-sort/imports': 'warn',
       'simple-import-sort/exports': 'warn',
     },
-  }
-)
+  },
+]

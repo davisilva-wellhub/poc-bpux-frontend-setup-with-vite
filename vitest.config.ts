@@ -7,14 +7,27 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'jsdom',
-    setupFiles: './src/test/setup.ts',
+    setupFiles: './src/test-utils/setup.ts',
     css: true,
+    server: {
+      deps: {
+        inline: [
+          '@gympass/tai-chi',
+          '@mui/material',
+          '@mui/lab',
+          '@mui/x-data-grid',
+          '@mui/x-date-pickers',
+          '@emotion/react',
+          '@emotion/styled',
+        ],
+      },
+    },
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
       exclude: [
         'node_modules/',
-        'src/test/',
+        'src/test-utils/',
         '**/*.d.ts',
         '**/*.config.*',
         '**/mockData',
@@ -33,6 +46,7 @@ export default defineConfig({
       '@/config': path.resolve(__dirname, './src/config'),
       '@/styles': path.resolve(__dirname, './src/styles'),
       '@/hoc': path.resolve(__dirname, './src/hoc'),
+      '@mui/material/styles': '@mui/material/styles/index.js',
     },
   },
 })

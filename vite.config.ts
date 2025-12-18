@@ -1,10 +1,13 @@
+import federation from '@originjs/vite-plugin-federation'
 import react from '@vitejs/plugin-react-swc'
 import path from 'path'
 import { defineConfig } from 'vite'
 
+import { federationConfig } from './federation.config'
+
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), federation(federationConfig)],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -16,5 +19,11 @@ export default defineConfig({
       '@/styles': path.resolve(__dirname, './src/styles'),
       '@/hoc': path.resolve(__dirname, './src/hoc'),
     },
+  },
+  build: {
+    modulePreload: false,
+    target: 'esnext',
+    minify: false,
+    cssCodeSplit: false,
   },
 })
