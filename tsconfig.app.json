@@ -10,8 +10,10 @@
     ],
     "module": "ESNext",
     "types": [
-      "vite/client"
+      "vite/client",
+      "vitest/globals"
     ],
+    "moduleResolution": "bundler",
     "skipLibCheck": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
@@ -22,9 +24,37 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true
+    "noUncheckedSideEffectImports": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ],
+      "@/core/*": [
+        "./src/core/*"
+      ],
+      "@/modules/*": [
+        "./src/modules/*"
+      ],
+      "@/pages/*": [
+        "./src/pages/*"
+      ],
+      "@/routes/*": [
+        "./src/routes/*"
+      ],
+      "@/config/*": [
+        "./src/config/*"
+      ],
+      "@/styles/*": [
+        "./src/styles/*"
+      ],
+      "@/hoc/*": [
+        "./src/hoc/*"
+      ]
+    }
   },
   "include": [
-    "routes"
+    "src",
+    "vit-env.d.ts"
   ]
 }

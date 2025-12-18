@@ -1,5 +1,6 @@
-import { useMemo, type PropsWithChildren } from 'react'
+import { type PropsWithChildren, useMemo } from 'react'
 import { v4 } from 'uuid'
+
 import { CorrelationIdContext } from './CorrelationIdContext'
 
 export const CorrelationIdProvider = ({ children }: PropsWithChildren) => {

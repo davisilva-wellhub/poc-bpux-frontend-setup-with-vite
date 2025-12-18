@@ -1,9 +1,9 @@
-import { Fragment, type PropsWithChildren } from 'react'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { Fragment, type PropsWithChildren } from 'react'
 
-import { queryClient } from '../../../config/query-client'
-import { LocalAccountWrapper } from '../LocalAccountWrapper'
-import { CorrelationIdProvider } from '../../providers'
+import { queryClient } from '@/config/query-client'
+import { LocalAccountWrapper } from '@/core/components/LocalAccountWrapper'
+import { CorrelationIdProvider } from '@/core/providers'
 
 const wrapperMap: Record<string, React.ElementType> = {
   account: LocalAccountWrapper,

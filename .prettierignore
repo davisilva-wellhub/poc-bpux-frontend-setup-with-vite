@@ -1,0 +1,32 @@
+# Dependencies
+node_modules
+dist
+build
+coverage
+
+# Generated files
+*.log
+.DS_Store
+.vite
+.vitest
+
+# Build artifacts
+dist-ssr
+*.local
+
+# IDE
+.vscode
+.idea
+
+# Test
+coverage
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Package manager
+yarn.lock
+package-lock.json
+pnpm-lock.yaml

@@ -1,7 +1,8 @@
 import { Route, Routes } from 'react-router-dom'
-import { Home } from '../pages/home'
-import { NotFound } from '../pages/not-found'
-import BillingInformation from '../pages/billing-information'
+
+import BillingInformation from '@/pages/billing-information'
+import { Home } from '@/pages/home'
+import { NotFound } from '@/pages/not-found'
 
 export const AccountRoutes = () => (
   <Routes>

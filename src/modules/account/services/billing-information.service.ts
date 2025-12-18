@@ -1,11 +1,13 @@
-import { AxiosResponse } from 'axios'
-import { billingUsersBffClient } from '../../../core/clients/billing-users-bff.client'
+import type { AxiosResponse } from 'axios'
+
+import { billingUsersBffClient } from '@/core/clients/billing-users-bff.client'
+
 import { CreateBillingInformationMapper } from './mappers/CreateBillingInformationMapper'
 import { UpdateBillingInformationMapper } from './mappers/UpdateBillingInformationMapper'
 
-export enum HEADERS {
-  CORRELATION_ID = 'x-gympass-correlation-id',
-}
+export const HEADERS = {
+  CORRELATION_ID: 'x-gympass-correlation-id',
+} as const
 
 export interface IBillingInformation {
   taxIdNumber: string
@@ -26,7 +28,6 @@ type TGetBillingInformationProps = {
 const getBillingInformation = async ({
   correlationId,
 }: TGetBillingInformationProps): Promise<IBillingInformation> => {
-  console.log({ correlationId })
   const { data } = await billingUsersBffClient.get(
     '/account/v1/billing-information',
     {
@@ -85,7 +86,7 @@ const updateBillingInformation = ({
 }
 
 export {
-  getBillingInformation,
   createBillingInformation,
+  getBillingInformation,
   updateBillingInformation,
 }

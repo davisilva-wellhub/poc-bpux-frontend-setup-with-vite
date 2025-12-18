@@ -1,1 +1,1 @@
-export * from './CorrelationIdProvider';
+export * from './CorrelationIdProvider'

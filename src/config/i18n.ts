@@ -1,7 +1,7 @@
-import { buildCache } from '@gympass/i18n-cache-web';
-import { init } from '@gympass/i18n';
+import { init } from '@gympass/i18n'
+import { buildCache } from '@gympass/i18n-cache-web'
 
-import { APP_LOCALE, LOCALIZATION_NAMESPACE } from '.';
+import { APP_LOCALE, LOCALIZATION_NAMESPACE } from '.'
 
 init({
   namespace: LOCALIZATION_NAMESPACE,
@@ -12,4 +12,4 @@ init({
     transKeepBasicHtmlNodesFor: ['b', 'br', 'i', 'strong'],
   },
   enableOTAUpdate: true,
-});
+})

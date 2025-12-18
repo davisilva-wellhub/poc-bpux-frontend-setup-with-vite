@@ -1,48 +1,117 @@
-import { AxiosError } from 'axios'
-import { withAuth } from '../../hoc/withAuth'
-import { useLoggedUser } from '../../modules/account/hooks/useLogged'
-import { useBillingInformationQuery } from './useBillingInformationQuery'
-import { useEffect } from 'react'
+import { Alert, Page, Typography } from '@gympass/tai-chi'
+import { Box, Snackbar } from '@mui/material'
 
-enum ERROR_REASON_KEYS {
-  NOT_AUTHORIZED = 'NOT_AUTHORIZED',
-}
+import { PageHeader } from '@/core/components/PageHeader'
+import { withAuth } from '@/hoc/withAuth'
+
+import { Form } from './components/Form'
+import { InformationDrawer } from './components/Form/InformationDrawer'
+import { FormLoader } from './components/Form/Loader'
+import { useBillingInformation } from './useBillingInformation'
 
 const BillingInformation = () => {
-  const loggedUser = useLoggedUser()
-
   const {
-    data: currentBillingInfo,
+    t,
+    isSuccess,
     isFetched,
-    isError,
-    error,
-  } = useBillingInformationQuery({
-    userId: loggedUser?.id,
-  })
-
-  console.log({
+    infoOpened,
+    isFromClaim,
+    setIsSuccess,
+    handleBackClick,
+    handleInfoClick,
+    handleCloseClick,
+    showGenericError,
     currentBillingInfo,
-    isFetched,
-    isError,
-    error,
-  })
+    setShowGenericError,
+  } = useBillingInformation()
 
-  useEffect(() => {
-    const shouldRedirect =
-      isError &&
-      error instanceof AxiosError &&
-      error?.response?.data?.key === ERROR_REASON_KEYS.NOT_AUTHORIZED
+  return (
+    <>
+      <PageHeader
+        title={t('billing_information.page.title', {
+          defaultValue: 'Dados de faturamento',
+        })}
+        onInfoClicked={handleInfoClick}
+        backButtonA11yLabel={t('billing_information.page.back.a11y.label', {
+          defaultValue: 'Voltar para a tela anterior',
+        })}
+        infoButtonA11yLabel={t('billing_information.page.info.a11y.label', {
+          defaultValue: 'Informações',
+        })}
+        infoButtonA11ySupplementary={t(
+          'billing_information.page.info.a11y.supplementary',
+          {
+            defaultValue: 'Entenda por que precisamos dos seus dados',
+          }
+        )}
+        onBackClicked={handleBackClick}
+      />
 
-    if (shouldRedirect) {
-      window.location.href = `${import.meta.env.VITE_ACCOUNT_MANAGER_URL}`
-    }
-  }, [isError, error])
+      <Page>
+        <Box maxWidth={520} mx="auto">
+          <Typography variant="body2" mb={7}>
+            {t('billing_information.page.description', {
+              defaultValue:
+                'De acordo com a nova reforma tributária, precisamos dos seus dados de faturamento.',
+            })}
+          </Typography>
 
-  if (isError) {
-    return <></>
-  }
+          {!isFetched ? (
+            <FormLoader />
+          ) : (
+            <Form
+              currentBillingInfo={currentBillingInfo}
+              onSuccess={() => {
+                setIsSuccess(true)
+                setShowGenericError(false)
+              }}
+              onError={() => {
+                setIsSuccess(false)
+                setShowGenericError(true)
+              }}
+            />
+          )}
+        </Box>
+      </Page>
 
-  return <h1>Billing Information</h1>
+      <InformationDrawer
+        isOpen={infoOpened}
+        onCloseClicked={handleCloseClick}
+        currentBillingInfo={currentBillingInfo}
+        trackReady={isFetched}
+      />
+
+      <Snackbar
+        open={isSuccess && !isFromClaim}
+        autoHideDuration={6000}
+        onClose={() => setIsSuccess(false)}
+        sx={{ justifyContent: 'center' }}
+      >
+        <Alert
+          message={t('billing_information.page.success_message', {
+            defaultValue: 'Dados de faturamento atualizados.',
+          })}
+          severity="success"
+          size="large"
+        />
+      </Snackbar>
+
+      <Snackbar
+        open={showGenericError}
+        autoHideDuration={6000}
+        onClose={() => setShowGenericError(false)}
+        sx={{ justifyContent: 'center' }}
+      >
+        <Alert
+          message={t('billing_information.page.generic_error_message', {
+            defaultValue: 'Algo deu errado. Tente novamente.',
+          })}
+          severity="error"
+          size="large"
+        />
+      </Snackbar>
+    </>
+  )
 }
 
 const BillingInformationPage = withAuth(BillingInformation)

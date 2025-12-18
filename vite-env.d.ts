@@ -1,5 +1,3 @@
-/// <reference types="vite/client" />
-
 interface ImportMetaEnv {
   readonly VITE_LOCAL_CONTEXT: string
   readonly VITE_KEYCLOAK_URL: string
@@ -17,6 +15,7 @@ interface ImportMetaEnv {
   readonly VITE_UNIFIED_CHECKOUT_FRONT_URL: string
 }
 
+/// <reference types="vite/client">
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }

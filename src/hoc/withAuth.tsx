@@ -1,6 +1,7 @@
 import { useAuth, useRequiredAuthentication } from '@gympass/keycloak-auth-js'
-import { setAuthToken } from '../core/config/auth-token-store'
-import { ComponentType, JSX } from 'react'
+import type { ComponentType, JSX } from 'react'
+
+import { setAuthToken } from '@/core/config/auth-token-store'
 
 export const withAuth = <P extends object>(Component: ComponentType<P>) => {
   const WithAuthComponent = (props: P): JSX.Element | null => {

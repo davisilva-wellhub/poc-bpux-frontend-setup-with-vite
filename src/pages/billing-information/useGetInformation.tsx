@@ -1,12 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
-import { useCorrelationId } from '../../core/providers/hooks/useCorrelationId'
-import { getBillingInformation } from '../../modules/account/services/billing-information.service'
+
+import { useCorrelationId } from '@/core/providers/hooks/useCorrelationId'
+import { getBillingInformation } from '@/modules/account/services/billing-information.service'
 
 type TBillingInformationQueryProps = {
   userId: string | undefined
 }
 
-export const useBillingInformationQuery = ({
+export const useGetInformation = ({
   userId,
 }: TBillingInformationQueryProps) => {
   const correlationId = useCorrelationId()
