@@ -50,7 +50,7 @@ export const useBillingInformation = () => {
   })
 
   const handleBackToApp = () => {
-    window.location.href = `${process.env.WELLHUB_LINKS_URL!}/view?url-id=login`
+    window.location.href = `${import.meta.env.WELLHUB_LINKS_URL!}/view?url-id=login`
   }
 
   const handleInfoClick = () => {

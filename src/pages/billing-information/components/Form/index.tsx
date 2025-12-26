@@ -1,16 +1,23 @@
 import { Button, TextField, Typography } from '@gympass/tai-chi'
 import { Box, Grid } from '@mui/material'
-import { FormProvider, useFormContext } from 'react-hook-form'
+import { useEffect } from 'react'
 
 import { ScreenReaderOnlyText } from '@/core/components/ScreenReaderOnlyText'
+import { useAriaLiveRegion } from '@/core/hooks/useAriaLiveRegion'
+import { useTracking } from '@/core/hooks/useTracking'
+import { useTranslation } from '@/core/hooks/useTranslation'
 import type { IBillingInformation } from '@/modules/account/types'
 
 import { ConfirmationDrawer } from './ConfirmationDrawer'
 import { useBillingInfoForm } from './hooks'
-import type { BillInfoFormValues } from './schema'
 import { ButtonWrapper } from './styles'
-import { inputFocusEventTrack } from './tracking'
-import { useForm } from './useForm'
+import {
+  clearInputEventTrack,
+  closeButtonClickEventTrack,
+  confirmButtonClickEventTrack,
+  inputFocusEventTrack,
+  saveInformationButtonClickEventTrack,
+} from './tracking'
 
 type TFormProps = {
   currentBillingInfo: IBillingInformation | undefined
@@ -18,53 +25,126 @@ type TFormProps = {
   onError: () => void
 }
 
-const FormContent = ({
+export const Form = ({
   currentBillingInfo,
   onSuccess,
   onError,
 }: TFormProps) => {
+  const { t } = useTranslation()
+  const { trackEvent } = useTracking()
   const {
-    register,
-    formState: { errors, isValid, isDirty },
-    watch,
-    handleSubmit,
-  } = useFormContext<BillInfoFormValues>()
-
-  const values = watch()
-
-  const {
-    t,
+    formik,
     ref,
-    trackEvent,
-    buildAdornment,
-    CPFHelperText,
-    addressNotFound,
     isConfirmOpened,
-    handleCloseClick,
-    cleanAddressFields,
+    setIsConfirmOpened,
+    hasCurrentBillingInfo,
+    billingInformationMutation,
+    handleConfirm,
     handleMaskedInput,
     allowCustomFields,
-    handleConfirmClick,
-    hasCurrentBillingInfo,
-    ariaLiveRegionElement,
-    billingInformationMutation,
-    handleSaveInformationClick,
-    disabledFieldSupplementaryText,
-  } = useForm({
+    cleanAddressFields,
+    addressNotFound,
+    userHasSelectedAddress,
+  } = useBillingInfoForm({
     currentBillingInfo,
-    onError,
     onSuccess,
+    onError,
+  })
+  const { setMessage, ariaLiveRegionElement } = useAriaLiveRegion()
+  const { values, handleChange, dirty, isValid, errors } = formik
+
+  const CPFHelperText = errors.taxIdNumber
+    ? errors.taxIdNumber
+    : t('billing_information.form.cpf.helper_text', {
+        defaultValue: 'After saved, CPF cannot be modified.',
+      })
+
+  const disabledFieldSupplementaryText = t(
+    'billing-users-mfe.billing_information.form.input.disabled.a11y.supplementary',
+    {
+      defaultValue: 'Disabled field, will be filled automatically',
+    }
+  )
+
+  const buildAdornment = ({
+    field,
+    formName,
+    value,
+  }: {
+    field: string
+    formName: keyof IBillingInformation
+    value: string
+  }) => ({
+    ariaLabel: t(
+      'billing-users-mfe.billing_information.form.input.clear.a11y.label',
+      {
+        defaultValue: 'Clear {{value}}',
+        value: value || field,
+      }
+    ),
+    icon: 'Close' as const,
+    onClick: () => {
+      if (formName === 'postalCode') {
+        cleanAddressFields()
+      }
+
+      formik.setFieldValue(formName, '')
+
+      trackEvent(clearInputEventTrack(formName, values.country))
+
+      setMessage(
+        t('billing_information.form.input.clear.a11y.feedback', {
+          defaultValue: '{{value}} has been deleted. Enter a new {{field}}',
+          field,
+          value: value || field,
+        })
+      )
+    },
   })
 
-  const { onSubmit } = useBillingInfoForm({
-    currentBillingInfo,
-    onSuccess,
-    onError,
-  })
+  useEffect(() => {
+    if (userHasSelectedAddress && !addressNotFound && !errors.postalCode) {
+      setMessage(
+        t('billing_information.form.cep.selected.a11y.feedback', {
+          address: `${values.street}, ${values.neighborhood}, ${values.city}, ${values.state}`,
+          defaultValue:
+            '{{address}} has been selected, disabled fields have been automatically filled',
+        })
+      )
+    }
+  }, [
+    userHasSelectedAddress,
+    addressNotFound,
+    errors.postalCode,
+    setMessage,
+    t,
+    values.street,
+    values.neighborhood,
+    values.city,
+    values.state,
+  ])
+
+  const handleSaveInformationClick = () => {
+    trackEvent(saveInformationButtonClickEventTrack(currentBillingInfo))
+  }
+
+  const handleConfirmClick = () => {
+    trackEvent(confirmButtonClickEventTrack(values))
+
+    handleConfirm()
+  }
+
+  const handleCloseClick = () => {
+    trackEvent(closeButtonClickEventTrack(values))
+
+    setIsConfirmOpened(false)
+  }
+
+  console.log({ mfe: 'billing-information', file: 'Form/index.tsx' })
 
   return (
     <Box pb="96px">
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={formik.handleSubmit}>
         <Box mb={7}>
           <Box mb={5}>
             <Typography component="h2" variant="body2" weight="bold">
@@ -169,15 +249,16 @@ const FormContent = ({
               }
             >
               <TextField
-                {...register('street')}
                 id="street"
                 label={t('billing_information.form.street.label', {
                   defaultValue: 'Street',
                 })}
+                name="street"
                 required
                 value={values.street}
+                onChange={handleChange}
                 disabled={!allowCustomFields}
-                error={!!errors.street}
+                error={!!(values.street && errors.street)}
                 fullWidth
                 ariaDescribedBy="street-disabled-supplementary-text"
                 endAdornment={
@@ -207,12 +288,13 @@ const FormContent = ({
               }
             >
               <TextField
-                {...register('doorNumber')}
                 id="doorNumber"
                 label={t('billing_information.form.number.label', {
                   defaultValue: 'Number',
                 })}
+                name="doorNumber"
                 value={values.doorNumber}
+                onChange={handleChange}
                 fullWidth
                 endAdornment={buildAdornment({
                   field: t('billing_information.form.number.label', {
@@ -232,13 +314,14 @@ const FormContent = ({
               }
             >
               <TextField
-                {...register('street2')}
                 id="street2"
                 label={t('billing_information.form.street2.label', {
                   defaultValue: 'Complement (Optional)',
                 })}
+                name="street2"
                 value={values.street2}
-                error={!!errors.street2}
+                onChange={handleChange}
+                error={!!(values.street2 && errors.street2)}
                 fullWidth
                 endAdornment={buildAdornment({
                   field: t('billing_information.form.street2.label', {
@@ -258,13 +341,14 @@ const FormContent = ({
               }
             >
               <TextField
-                {...register('neighborhood')}
                 id="neighborhood"
                 label={t('billing_information.form.neighborhood.label', {
                   defaultValue: 'Neighborhood',
                 })}
+                name="neighborhood"
                 required
                 value={values.neighborhood}
+                onChange={handleChange}
                 disabled={!allowCustomFields}
                 fullWidth
                 ariaDescribedBy="neighborhood-disabled-supplementary-text"
@@ -298,11 +382,11 @@ const FormContent = ({
               }
             >
               <TextField
-                {...register('city')}
                 id="city"
                 label={t('billing_information.form.city.label', {
                   defaultValue: 'City',
                 })}
+                name="city"
                 value={values.city}
                 disabled
                 fullWidth
@@ -321,11 +405,11 @@ const FormContent = ({
               }
             >
               <TextField
-                {...register('state')}
                 id="state"
                 label={t('billing_information.form.state.label', {
                   defaultValue: 'State',
                 })}
+                name="state"
                 value={values.state}
                 disabled
                 fullWidth
@@ -344,11 +428,11 @@ const FormContent = ({
               }
             >
               <TextField
-                {...register('country')}
                 id="country"
                 label={t('billing_information.form.country.label', {
                   defaultValue: 'Country',
                 })}
+                name="country"
                 value={values.country}
                 disabled
                 fullWidth
@@ -366,7 +450,7 @@ const FormContent = ({
             type="submit"
             fullWidth
             size="large"
-            disabled={!isDirty || !isValid}
+            disabled={!dirty || !isValid}
             loading={billingInformationMutation.isPending}
             onClick={handleSaveInformationClick}
           >
@@ -377,7 +461,7 @@ const FormContent = ({
         </ButtonWrapper>
       </form>
 
-      {!hasCurrentBillingInfo && (
+      {!hasCurrentBillingInfo && values && (
         <ConfirmationDrawer
           isOpen={isConfirmOpened}
           billingInformation={values}
@@ -389,15 +473,5 @@ const FormContent = ({
 
       {ariaLiveRegionElement}
     </Box>
-  )
-}
-
-export const Form = (props: TFormProps) => {
-  const { methods } = useBillingInfoForm(props)
-
-  return (
-    <FormProvider {...methods}>
-      <FormContent {...props} />
-    </FormProvider>
   )
 }

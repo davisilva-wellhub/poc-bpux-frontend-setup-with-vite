@@ -9,11 +9,17 @@ export const withAuth = <P extends object>(Component: ComponentType<P>) => {
 
     const { initialized, keycloak } = useAuth()
 
-    const token = keycloak?.token || null
+    if (!initialized) {
+      setAuthToken(null)
+      return null
+    }
 
-    setAuthToken(token)
+    if (!keycloak?.token) {
+      setAuthToken(null)
+      return null
+    }
 
-    if (!initialized || !token) return null
+    setAuthToken(keycloak.token)
 
     return <Component {...props} />
   }

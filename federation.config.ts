@@ -7,7 +7,7 @@ export interface FederationConfig {
 }
 
 export const exposedModules = {
-  './BillingInformation': './src/pages/billing-information/index.tsx',
+  './BillingInformationPage': './src/exposes/BillingInformationExpose.tsx',
 }
 
 export const remoteModules: Record<string, string> = {}
@@ -15,15 +15,15 @@ export const remoteModules: Record<string, string> = {}
 export const sharedDependencies = {
   react: {
     singleton: true,
-    requiredVersion: '^19.2.0',
+    requiredVersion: false,
   },
   'react-dom': {
     singleton: true,
-    requiredVersion: '^19.2.0',
+    requiredVersion: false,
   },
   'react-router-dom': {
     singleton: true,
-    requiredVersion: '^7.10.1',
+    requiredVersion: false,
   },
   '@tanstack/react-query': {
     singleton: true,
@@ -47,7 +47,16 @@ export const sharedDependencies = {
   '@gympass/i18n': {
     singleton: true,
   },
+  '@gympass/keycloak-auth-js': {
+    singleton: true,
+  },
   '@gympass/darwin-auth': {
+    singleton: true,
+  },
+  'react-hook-form': {
+    singleton: true,
+  },
+  'react-google-autocomplete': {
     singleton: true,
   },
   'styled-components': {
@@ -56,7 +65,7 @@ export const sharedDependencies = {
 }
 
 export const federationConfig: FederationConfig = {
-  name: 'billing_information',
+  name: 'billingInformationMFE',
   filename: 'remoteEntry.js',
   exposes: exposedModules,
   remotes: remoteModules,

@@ -115,4 +115,6 @@ const BillingInformation = () => {
 }
 
 const BillingInformationPage = withAuth(BillingInformation)
+
+export { BillingInformation }
 export default BillingInformationPage

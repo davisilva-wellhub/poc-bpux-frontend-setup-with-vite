@@ -32,3 +32,5 @@ export const App = () => {
     </LocalWrapper>
   )
 }
+
+export default App

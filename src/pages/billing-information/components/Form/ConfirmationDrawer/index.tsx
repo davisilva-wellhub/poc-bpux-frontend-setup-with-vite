@@ -101,7 +101,7 @@ export const ConfirmationDrawer = ({
             fullWidth
           >
             {t('billing_information.form.confirmation.back', {
-              defaultValue: 'Alterar dados',
+              defaultValue: 'Edit data',
             })}
           </Button>
         </Box>

@@ -10,8 +10,13 @@ billingUsersBffClient.interceptors.request.use(
   config => {
     const token = getAuthToken()
 
+    console.log('[MFE Axios Interceptor] Token:', token ? 'EXISTS' : 'NULL')
+    console.log('[MFE Axios Interceptor] Request URL:', config.url)
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`
+    } else {
+      console.warn('[MFE Axios Interceptor] No token available for request')
     }
 
     return config

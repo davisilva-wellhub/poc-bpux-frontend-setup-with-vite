@@ -11,6 +11,7 @@ const wrapperMap: Record<string, React.ElementType> = {
 
 type TContextProps = PropsWithChildren & {
   context: string | undefined
+  authInstance?: any
 }
 
 const ContextWrapper = ({ children, context }: TContextProps) => {
@@ -20,7 +21,11 @@ const ContextWrapper = ({ children, context }: TContextProps) => {
   return <Wrapper>{children}</Wrapper>
 }
 
-export const LocalWrapper = ({ children, context }: TContextProps) => (
+export const LocalWrapper = ({
+  children,
+  context,
+  authInstance: _authInstance,
+}: TContextProps) => (
   <QueryClientProvider client={queryClient}>
     <CorrelationIdProvider>
       <ContextWrapper context={context}>{children}</ContextWrapper>
