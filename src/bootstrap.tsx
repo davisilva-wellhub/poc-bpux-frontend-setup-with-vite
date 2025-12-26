@@ -13,12 +13,8 @@ export const mount = (
   console.log('[MFE Bootstrap] mount called with authInstance:', authInstance)
   console.log('[MFE Bootstrap] token:', authInstance?.keycloak?.token)
 
-  // Set auth token if provided by host
   if (authInstance?.keycloak?.token) {
-    console.log('[MFE Bootstrap] Setting auth token from host')
     setAuthToken(authInstance.keycloak.token)
-  } else {
-    console.warn('[MFE Bootstrap] No token provided by host')
   }
 
   const root = createRoot(container)
