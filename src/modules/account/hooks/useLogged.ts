@@ -1,5 +1,6 @@
-import { useAuth } from '@gympass/keycloak-auth-js'
-import { useMemo } from 'react'
+import { useEffect, useState } from 'react'
+
+import { getLoggedUser } from '@/core/config/user-store'
 
 type TLoggedUser = {
   id: string
@@ -7,18 +8,22 @@ type TLoggedUser = {
 }
 
 export const useLoggedUser = () => {
-  const { keycloak } = useAuth()
-
-  const loggedUser = useMemo<TLoggedUser | null>(
-    () =>
-      !keycloak?.tokenParsed
-        ? null
-        : {
-            id: keycloak.tokenParsed.uid as string,
-            email: keycloak.tokenParsed.email as string,
-          },
-    [keycloak]
+  const [loggedUser, setLoggedUser] = useState<TLoggedUser | null>(
+    getLoggedUser()
   )
+
+  useEffect(() => {
+    const checkUser = () => {
+      const user = getLoggedUser()
+      setLoggedUser(user)
+    }
+
+    checkUser()
+
+    const interval = setInterval(checkUser, 100)
+
+    return () => clearInterval(interval)
+  }, [])
 
   return loggedUser
 }
