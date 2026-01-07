@@ -10,9 +10,6 @@ export const mount = (
   container: HTMLElement,
   authInstance?: { keycloak?: { token?: string } }
 ) => {
-  console.log('[MFE Bootstrap] mount called with authInstance:', authInstance)
-  console.log('[MFE Bootstrap] token:', authInstance?.keycloak?.token)
-
   if (authInstance?.keycloak?.token) {
     setAuthToken(authInstance.keycloak.token)
   }
